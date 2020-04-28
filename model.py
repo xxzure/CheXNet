@@ -75,18 +75,18 @@ def main():
 
     # initialize the ground truth and output tensor
     gt = torch.FloatTensor()
-    gt = gt.cuda()
+    gt = gt.cpu()
     pred = torch.FloatTensor()
-    pred = pred.cuda()
+    pred = pred.cpu()
 
     # switch to evaluate mode
     model.eval()
 
     for i, (inp, target) in enumerate(test_loader):
-        target = target.cuda()
+        target = target.cpu()
         gt = torch.cat((gt, target), 0)
         bs, n_crops, c, h, w = inp.size()
-        input_var = torch.autograd.Variable(inp.view(-1, c, h, w).cuda(), volatile=True)
+        input_var = torch.autograd.Variable(inp.view(-1, c, h, w).cpu(), volatile=True)
         output = model(input_var)
         output_mean = output.view(bs, n_crops, -1).mean(1)
         pred = torch.cat((pred, output_mean.data), 0)
