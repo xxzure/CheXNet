@@ -15,6 +15,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from read_data import ChestXrayDataSet
 from sklearn.metrics import roc_auc_score
+from collections import OrderedDict
 
 
 CKPT_PATH = 'model.pth.tar'
@@ -38,7 +39,17 @@ def main():
         print("=> loading checkpoint")
         checkpoint = torch.load(CKPT_PATH)
         # model.load_state_dict(checkpoint['state_dict'])
-        model.load_state_dict({k.replace('module.',''):v for k,v in checkpoint['state_dict'].items()})
+        model.load_state_dict({k.replace('module.',''):v for k,v in checkpoint.items()})
+        # new_state_dict = OrderedDict()
+        # 修改 key，没有module字段则需要不上，如果有，则需要修改为 module.features
+        # for k, v in checkpoint.items():
+        #     if 'module' not in k:
+        #         k = 'module.'+k
+        #     else:
+        #         k = k.replace('features.module.', 'module.features.')
+        #     new_state_dict[k]=v
+        # # 加载修改后的新参数dict文件
+        # model.load_state_dict(new_state_dict)
         print("=> loaded checkpoint")
     else:
         print("=> no checkpoint found")
