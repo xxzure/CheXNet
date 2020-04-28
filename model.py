@@ -38,7 +38,7 @@ def main():
         print("=> loading checkpoint")
         checkpoint = torch.load(CKPT_PATH)
         # model.load_state_dict(checkpoint['state_dict'])
-        model.load_state_dict({k.replace('module.',''):v for k,v in checkpoint['model'].items()})
+        model.load_state_dict({k.replace('module.',''):v for k,v in checkpoint['state_dict'].items()})
         print("=> loaded checkpoint")
     else:
         print("=> no checkpoint found")
