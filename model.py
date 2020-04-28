@@ -86,8 +86,9 @@ def main():
         target = target.cpu()
         gt = torch.cat((gt, target), 0)
         bs, n_crops, c, h, w = inp.size()
-        input_var = torch.autograd.Variable(inp.view(-1, c, h, w).cpu(), volatile=True)
+        input_var = torch.autograd.Variable(inp.view(-1, c, h, w).cpu())
         output = model(input_var)
+        print(output.tolist())
         output_mean = output.view(bs, n_crops, -1).mean(1)
         pred = torch.cat((pred, output_mean.data), 0)
 
