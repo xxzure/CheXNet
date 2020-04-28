@@ -32,7 +32,7 @@ def main():
 
     # initialize and load the model
     model = DenseNet121(N_CLASSES).cuda()
-    model = torch.nn.DataParallel(model).cuda()
+    # model = torch.nn.DataParallel(model).cuda()
 
     if os.path.isfile(CKPT_PATH):
         print("=> loading checkpoint")
