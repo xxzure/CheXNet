@@ -41,7 +41,7 @@ def main():
 
         # Code modified from torchvision densenet source for loading from pre .4 densenet weights.
         state_dict = checkpoint['state_dict']
-        remove_data_parallel = true # Change if you don't want to use nn.DataParallel(model)
+        remove_data_parallel = True # Change if you don't want to use nn.DataParallel(model)
 
         pattern = re.compile(
             r'^(.*denselayer\d+\.(?:norm|relu|conv))\.((?:[12])\.(?:weight|bias|running_mean|running_var))$')
