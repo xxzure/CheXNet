@@ -15,7 +15,7 @@ import torchvision.transforms as transforms
 from torch.utils.data import DataLoader
 from read_data import ChestXrayDataSet
 from sklearn.metrics import roc_auc_score
-from collections import OrderedDict
+import re
 
 
 CKPT_PATH = 'model.pth.tar'
@@ -32,24 +32,27 @@ def main():
     cudnn.benchmark = True
 
     # initialize and load the model
-    model = DenseNet121(N_CLASSES).cuda()
-    model = torch.nn.DataParallel(model).cuda()
+    model = DenseNet121(N_CLASSES).cpu()
+    # model = torch.nn.DataParallel(model).cuda()
 
     if os.path.isfile(CKPT_PATH):
         print("=> loading checkpoint")
         checkpoint = torch.load(CKPT_PATH)
-        # model.load_state_dict(checkpoint['state_dict'])
-        # model.load_state_dict({k.replace('module.',''):v for k,v in checkpoint.items()})
-        new_state_dict = OrderedDict()
-        # 修改 key，没有module字段则需要不上，如果有，则需要修改为 module.features
-        for k, v in checkpoint.items():
-            if 'module' not in k:
-                k = 'module.'+k
-            else:
-                k = k.replace('features.module.', 'module.features.')
-            new_state_dict[k]=v
-        # # 加载修改后的新参数dict文件
-        model.load_state_dict(new_state_dict)
+
+        # Code modified from torchvision densenet source for loading from pre .4 densenet weights.
+        state_dict = checkpoint['state_dict']
+        remove_data_parallel = true # Change if you don't want to use nn.DataParallel(model)
+
+        pattern = re.compile(
+            r'^(.*denselayer\d+\.(?:norm|relu|conv))\.((?:[12])\.(?:weight|bias|running_mean|running_var))$')
+        for key in list(state_dict.keys()):
+            match = pattern.match(key)
+            new_key = match.group(1) + match.group(2) if match else key
+            new_key = new_key[7:] if remove_data_parallel else new_key
+            state_dict[new_key] = state_dict[key]
+            # Delete old key only if modified.
+            if match or remove_data_parallel: 
+                del state_dict[key]
         print("=> loaded checkpoint")
     else:
         print("=> no checkpoint found")
